@@ -1,0 +1,37 @@
+.step-content {
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Update primary color to match SMU blue */
+  .ant-btn-primary {
+    background-color: #2e3192 !important;
+    border-color: #2e3192 !important;
+  }
+  
+  .ant-btn-primary:hover {
+    background-color: #3d4190 !important;
+    border-color: #3d4190 !important;
+  }
+  
+  .ant-steps-item-process .ant-steps-item-icon {
+    background-color: #2e3192 !important;
+    border-color: #2e3192 !important;
+  }
+  
+  a {
+    color: #2e3192 !important;
+  }
+  
+  .ant-steps-item-finish .ant-steps-item-icon {
+    border-color: #2e3192 !important;
+  }
+  
+  .ant-steps-item-finish .ant-steps-item-icon > .ant-steps-icon {
+    color: #2e3192 !important;
+  }
+  
+  .ant-steps-item-finish > .ant-steps-item-container > .ant-steps-item-content > .ant-steps-item-title::after {
+    background-color: #2e3192 !important;
+  }
