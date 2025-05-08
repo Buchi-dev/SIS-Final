@@ -7,8 +7,8 @@ const studentSchema = new mongoose.Schema({
     lastName: { type: String, required: true },
     course: { type: String, required: true },
     year: { type: String, required: true }
-}, { collection: 'students-data' });
+}, { timestamps: true });
 
-const Student = mongoose.model('Student', studentSchema);
+const Student = mongoose.model('students-data', studentSchema);
 
 module.exports = Student;
