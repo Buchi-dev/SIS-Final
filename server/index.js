@@ -6,7 +6,7 @@ const studentRoutes = require("./routes/student.routes");
 
 const app = express();
 const port = 3000;
-const MONGODB_URI = "mongodb://localhost:27017/sis_database";
+const MONGODB_URI = "mongodb://localhost:27017/SIS";
 
 // Middleware setup
 app.use(cors());

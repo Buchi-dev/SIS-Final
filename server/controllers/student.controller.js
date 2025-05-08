@@ -10,20 +10,19 @@ const handleServerError = (res, error, message = 'Server error') => {
   });
 };
 
-// Validate required student fields
+// Validate required student fields based on our schema
 const validateRequiredFields = (req) => {
-  const { studentId, firstName, lastName, program, year, section } = req.body;
-  const missing = !studentId || !firstName || !lastName || !program || !year || !section;
+  const { idNumber, firstName, lastName, course, year } = req.body;
+  const missing = !idNumber || !firstName || !lastName || !course || !year;
   
   return {
     isValid: !missing,
     requiredFields: {
-      studentId: !!studentId,
+      idNumber: !!idNumber,
       firstName: !!firstName,
       lastName: !!lastName,
-      program: !!program,
-      year: !!year,
-      section: !!section
+      course: !!course,
+      year: !!year
     }
   };
 };
@@ -32,16 +31,12 @@ const validateRequiredFields = (req) => {
 exports.createStudentProfile = async (req, res) => {
   try {
     const { 
-      studentId,
+      idNumber,
       firstName,
       middleName,
       lastName, 
-      program, 
-      year, 
-      section, 
-      dateOfBirth, 
-      contactNumber, 
-      address 
+      course, 
+      year
     } = req.body;
     
     // Validate required fields
@@ -54,23 +49,19 @@ exports.createStudentProfile = async (req, res) => {
     }
     
     // Check if student already exists
-    const existingStudent = await Student.findOne({ studentId });
+    const existingStudent = await Student.findOne({ idNumber });
     if (existingStudent) {
       return res.status(400).json({ message: 'Student profile already exists' });
     }
     
     // Create new student profile
     const student = new Student({
-      studentId,
+      idNumber,
       firstName,
       middleName: middleName || '',
       lastName,
-      program,
-      year: Number(year),
-      section,
-      dateOfBirth,
-      contactNumber: contactNumber || '',
-      address: address || ''
+      course,
+      year
     });
     
     await student.save();
@@ -89,7 +80,7 @@ exports.getStudentProfile = async (req, res) => {
   try {
     const { studentId } = req.params;
     
-    const student = await Student.findOne({ studentId });
+    const student = await Student.findOne({ idNumber: studentId });
     if (!student) {
       return res.status(404).json({ message: 'Student profile not found' });
     }
@@ -104,13 +95,16 @@ exports.getStudentProfile = async (req, res) => {
 exports.updateStudentProfile = async (req, res) => {
   try {
     const { studentId } = req.params;
-    const updateData = { ...req.body };
+    const { firstName, middleName, lastName, course, year } = req.body;
+    const updateData = { firstName, middleName, lastName, course, year };
     
-    // Prevent changing studentId
-    delete updateData.studentId;
+    // Filter out undefined values
+    Object.keys(updateData).forEach(key => 
+      updateData[key] === undefined && delete updateData[key]
+    );
     
     const student = await Student.findOneAndUpdate(
-      { studentId },
+      { idNumber: studentId },
       { $set: updateData },
       { new: true }
     );
@@ -133,7 +127,7 @@ exports.deleteStudentProfile = async (req, res) => {
   try {
     const { studentId } = req.params;
     
-    const result = await Student.findOneAndDelete({ studentId });
+    const result = await Student.findOneAndDelete({ idNumber: studentId });
     
     if (!result) {
       return res.status(404).json({ message: 'Student profile not found' });
@@ -154,5 +148,46 @@ exports.getAllStudents = async (req, res) => {
     res.status(200).json(students);
   } catch (error) {
     handleServerError(res, error, 'Error fetching student profiles');
+  }
+};
+
+// Test creating a student profile - validates data without saving to DB
+exports.testCreateStudent = async (req, res) => {
+  try {
+    const { 
+      idNumber,
+      firstName,
+      middleName,
+      lastName, 
+      course, 
+      year
+    } = req.body;
+    
+    // Validate required fields
+    const validation = validateRequiredFields(req);
+    if (!validation.isValid) {
+      return res.status(400).json({ 
+        message: 'Missing required fields',
+        requiredFields: validation.requiredFields,
+        valid: false
+      });
+    }
+    
+    // Check if student already exists
+    const existingStudent = await Student.findOne({ idNumber });
+    if (existingStudent) {
+      return res.status(400).json({ 
+        message: 'Student profile already exists',
+        valid: false 
+      });
+    }
+    
+    // Validation passed
+    res.status(200).json({ 
+      message: 'Student data is valid',
+      valid: true
+    });
+  } catch (error) {
+    handleServerError(res, error, 'Error testing student profile creation');
   }
 };

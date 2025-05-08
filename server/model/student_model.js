@@ -1,54 +1,14 @@
 const mongoose = require('mongoose');
 
-/**
- * Student schema for storing student information
- */
 const studentSchema = new mongoose.Schema({
-  // Unique student identifier
-  studentId: {
-    type: String,
-    required: true,
-    unique: true
-  },
+    idNumber: { type: String, required: true, unique: true },
+    firstName: { type: String, required: true },
+    middleName: { type: String },
+    lastName: { type: String, required: true },
+    course: { type: String, required: true },
+    year: { type: String, required: true }
+}, { collection: 'students-data' });
 
-  // Personal information
-  firstName: {
-    type: String,
-    required: true
-  },
-  middleName: {
-    type: String,
-    required: false
-  },
-  lastName: {
-    type: String,
-    required: true
-  },
-  
-  // Academic information
-  program: {
-    type: String,
-    required: true
-  },
-  year: {
-    type: Number,
-    required: true
-  },
-  section: {
-    type: String,
-    required: true
-  },
-  
-  // Additional information
-  dateOfBirth: {
-    type: Date
-  },
-  contactNumber: {
-    type: String
-  },
-  address: {
-    type: String
-  }
-}, { timestamps: true });
+const Student = mongoose.model('Student', studentSchema);
 
-module.exports = mongoose.model('Student', studentSchema);
+module.exports = Student;

@@ -9,5 +9,7 @@ router.get('/profile/:studentId', studentController.getStudentProfile);
 router.put('/profile/:studentId', studentController.updateStudentProfile);
 router.delete('/profile/:studentId', studentController.deleteStudentProfile);
 
+// Test endpoint for validation before creating student
+router.post('/test-create', studentController.testCreateStudent);
 
 module.exports = router;
