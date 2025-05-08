@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, message, Space, Popconfirm, Select } from 'antd';
+import { Table, Button, Modal, Form, message, Space, Popconfirm } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import studentService from '../../services/studentService';
+import StudentForm from '../../components/students/StudentForm';
+import moment from 'moment';
 
 const StudentManagement = () => {
   const [students, setStudents] = useState([]);
@@ -35,7 +37,10 @@ const StudentManagement = () => {
 
   const handleEdit = (record) => {
     setEditingId(record._id);
-    form.setFieldsValue(record);
+    form.setFieldsValue({
+      ...record,
+      dateOfBirth: record.dateOfBirth ? moment(record.dateOfBirth) : null,
+    });
     setModalVisible(true);
   };
 
@@ -53,45 +58,50 @@ const StudentManagement = () => {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
+      const formattedValues = {
+        ...values,
+        dateOfBirth: values.dateOfBirth?.format('YYYY-MM-DD'),
+      };
+
       if (editingId) {
-        await studentService.updateStudent(editingId, values);
+        await studentService.updateStudent(editingId, formattedValues);
         message.success('Student updated successfully');
       } else {
-        await studentService.createStudent(values);
+        await studentService.createStudent(formattedValues);
         message.success('Student created successfully');
       }
       setModalVisible(false);
       fetchStudents();
     } catch (error) {
-      message.error('Failed to save student');
-      console.error(error);
+      message.error(error.message || 'Operation failed');
     }
   };
 
   const columns = [
     {
-      title: 'ID Number',
-      dataIndex: 'idNumber',
-      key: 'idNumber',
+      title: 'Student ID',
+      dataIndex: 'studentId',
+      key: 'studentId',
     },
     {
-      title: 'Name',
-      key: 'name',
-      render: (_, record) => (
-        <span>
-          {record.firstName} {record.middleName ? `${record.middleName} ` : ''}{record.lastName}
-        </span>
-      ),
+      title: 'First Name',
+      dataIndex: 'firstName',
+      key: 'firstName',
     },
     {
-      title: 'Course',
-      dataIndex: 'course',
-      key: 'course',
+      title: 'Last Name',
+      dataIndex: 'lastName',
+      key: 'lastName',
     },
     {
-      title: 'Year',
-      dataIndex: 'year',
-      key: 'year',
+      title: 'Email',
+      dataIndex: 'email',
+      key: 'email',
+    },
+    {
+      title: 'Phone Number',
+      dataIndex: 'phoneNumber',
+      key: 'phoneNumber',
     },
     {
       title: 'Actions',
@@ -121,9 +131,8 @@ const StudentManagement = () => {
   ];
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-        <h1>Student Management</h1>
+    <div style={{ padding: '24px' }}>
+      <div style={{ marginBottom: '16px' }}>
         <Button
           type="primary"
           icon={<PlusOutlined />}
@@ -138,8 +147,6 @@ const StudentManagement = () => {
         dataSource={students}
         rowKey="_id"
         loading={loading}
-        bordered
-        pagination={{ pageSize: 10 }}
       />
 
       <Modal
@@ -147,69 +154,9 @@ const StudentManagement = () => {
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
-        width={600}
+        destroyOnClose
       >
-        <Form
-          form={form}
-          layout="vertical"
-        >
-          <Form.Item
-            name="idNumber"
-            label="ID Number"
-            rules={[{ required: true, message: 'Please input ID number!' }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="firstName"
-            label="First Name"
-            rules={[{ required: true, message: 'Please input first name!' }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="middleName"
-            label="Middle Name"
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="lastName"
-            label="Last Name"
-            rules={[{ required: true, message: 'Please input last name!' }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="course"
-            label="Course"
-            rules={[{ required: true, message: 'Please select course!' }]}
-          >
-            <Select>
-              <Select.Option value="BSIT">BSIT</Select.Option>
-              <Select.Option value="BSCS">BSCS</Select.Option>
-              <Select.Option value="BSCE">BSCE</Select.Option>
-              <Select.Option value="BSEE">BSEE</Select.Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="year"
-            label="Year Level"
-            rules={[{ required: true, message: 'Please select year level!' }]}
-          >
-            <Select>
-              <Select.Option value="1">1st Year</Select.Option>
-              <Select.Option value="2">2nd Year</Select.Option>
-              <Select.Option value="3">3rd Year</Select.Option>
-              <Select.Option value="4">4th Year</Select.Option>
-            </Select>
-          </Form.Item>
-        </Form>
+        <StudentForm form={form} editingId={editingId} />
       </Modal>
     </div>
   );
